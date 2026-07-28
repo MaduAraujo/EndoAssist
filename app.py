@@ -41,13 +41,11 @@ app.mount("/javascript", StaticFiles(directory=STATIC_DIR / "javascript"), name=
 
 @app.get("/", response_class=FileResponse, include_in_schema=False)
 def interface():
-    """Serve a landing page com a pergunta inicial (static/pages/index.html)."""
     return FileResponse(STATIC_DIR / "pages" / "index.html")
 
 
 @app.get("/chat", response_class=FileResponse, include_in_schema=False)
 def chat_interface():
-    """Serve a interface de chat (static/pages/chat.html)."""
     return FileResponse(STATIC_DIR / "pages" / "chat.html")
 
 
@@ -76,9 +74,6 @@ class FeedbackRequest(BaseModel):
     resposta: str
     avaliacao: Literal["up", "down"]
 
-
-# --- rate limiting simples em memoria (protege o /perguntar de abuso) ---
-
 _rate_lock = threading.Lock()
 _rate_hits: dict[str, list[float]] = defaultdict(list)
 
@@ -99,11 +94,7 @@ def _checar_limite(chave: str, limite: int, janela_seg: int) -> None:
 def _identificar_cliente(request: Request) -> str:
     return request.client.host if request.client else "desconhecido"
 
-
-# --- log simples (jsonl) das perguntas e do feedback recebido ---
-
 _log_lock = threading.Lock()
-
 
 def _registrar(caminho: Path, dados: dict) -> None:
     linha = {"timestamp": datetime.now(timezone.utc).isoformat(), **dados}
@@ -115,7 +106,6 @@ def _registrar(caminho: Path, dados: dict) -> None:
 def health():
     return {"status": "ok"}
 
-
 @app.post("/perguntar", response_model=RespostaResponse)
 def perguntar_endpoint(body: PerguntaRequest, request: Request):
     if not body.pergunta.strip():
@@ -126,7 +116,6 @@ def perguntar_endpoint(body: PerguntaRequest, request: Request):
     resultado = perguntar(_agente, body.pergunta, historico)
     _registrar(LOG_DIR / "perguntas.jsonl", {"pergunta": body.pergunta})
     return RespostaResponse(**resultado)
-
 
 @app.post("/perguntar/stream")
 def perguntar_stream_endpoint(body: PerguntaRequest, request: Request):
@@ -146,7 +135,7 @@ def perguntar_stream_endpoint(body: PerguntaRequest, request: Request):
                 yield f"data: {json.dumps({'tipo': tipo, 'dado': dado}, ensure_ascii=False)}\n\n"
             yield f"data: {json.dumps({'tipo': 'fim'}, ensure_ascii=False)}\n\n"
             _registrar(LOG_DIR / "perguntas.jsonl", {"pergunta": pergunta})
-        except Exception as exc:  # falha do modelo/tool a meio do streaming
+        except Exception as exc:  
             yield f"data: {json.dumps({'tipo': 'erro', 'dado': str(exc)}, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(
@@ -154,7 +143,6 @@ def perguntar_stream_endpoint(body: PerguntaRequest, request: Request):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
-
 
 @app.post("/feedback")
 def feedback_endpoint(body: FeedbackRequest, request: Request):

@@ -1,17 +1,12 @@
 import sys
-
 from dotenv import load_dotenv
-
 from rag_agent import montar_agente, perguntar
 
-# Evita "mojibake" (acentos exibidos como caracteres estranhos) no console
-# do Windows, cujo codepage padrao geralmente nao e UTF-8.
 if sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stdin.reconfigure(encoding="utf-8")
 
 load_dotenv()
-
 
 def main() -> None:
     print("EndoAssist - agente sobre Endometriose (Groq + LangChain)")

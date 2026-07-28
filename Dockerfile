@@ -13,8 +13,6 @@ COPY rag_agent.py ingest.py agente.py app.py ./
 COPY docs/ ./docs/
 COPY static/ ./static/
 
-# Gera o indice vetorial (chroma_db/) em tempo de build, para a imagem
-# ja subir pronta para responder - nao requer GROQ_API_KEY neste passo.
 RUN python ingest.py
 
 EXPOSE 8080

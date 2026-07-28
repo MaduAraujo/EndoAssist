@@ -1,57 +1,159 @@
 # EndoAssist
 
-Agente de IA que responde perguntas sobre Endometriose com base nos
-documentos em `docs/`.
+Agente de IA conversacional especializado em **Endometriose**. Ele responde
+perguntas sobre sintomas, diagnóstico, tratamentos e exames com base em um
+conjunto de documentos de referência, usando a técnica de
+**RAG (Retrieval-Augmented Generation)**: em vez de responder "do zero", o
+agente busca os trechos mais relevantes nos documentos e usa esse contexto
+para gerar uma resposta ancorada nas fontes, citando de qual documento e
+página cada informação veio.
 
-- **LangChain** monta o agente (Groq + ferramenta de busca semantica).
-- **Pandas** organiza o conteudo extraido dos PDFs antes da indexacao.
-- **Groq (GroqCloud)** gera as respostas.
-- **Chroma** (com embeddings locais `sentence-transformers`) faz a busca
-  semantica nos documentos.
-- **FastAPI** expoe o agente como API HTTP.
+O agente é explicitamente instruído a admitir quando não sabe algo e a
+recomendar consulta a um médico especialista — ele não substitui atendimento
+médico.
 
-## Estrutura
+## Arquitetura da solução
+
+```
+                      ┌──────────────────────────┐
+                      │   docs/*.pdf (fontes)    │
+                      └────────────┬─────────────┘
+                                   │ python ingest.py (offline / build)
+                                   ▼
+   pypdf (extrai texto) → pandas (organiza por fonte/página)
+                                   │
+                     RecursiveCharacterTextSplitter (chunks)
+                                   │
+        HuggingFaceEmbeddings (sentence-transformers, multilingue)
+                                   │
+                                   ▼
+                      ┌──────────────────────────┐
+                      │   chroma_db/ (vector DB) │
+                      └────────────┬─────────────┘
+                                   │ retriever.invoke(pergunta)
+                                   ▼
+      ┌───────────────────────────────────────────────────────┐
+      │  Agente LangChain (create_agent)                       │
+      │  - LLM: ChatGroq (llama-3.3-70b-versatile)             │
+      │  - Tool: buscar_documentos → busca semantica no Chroma │
+      │  - System prompt: responder só com base nos docs,      │
+      │    citar fontes, indicar limite e sugerir médico        │
+      └───────────────────────────┬────────────────────────────┘
+                                   │
+              ┌────────────────────┼─────────────────────┐
+              ▼                    ▼                      ▼
+        agente.py (CLI)      app.py (FastAPI)      logs/*.jsonl
+                              │        │            (perguntas e feedback)
+                        static/ (chat  /perguntar
+                        web + página   /perguntar/stream (SSE)
+                        inicial)       /feedback
+```
+
+Fluxo por pergunta:
+1. O usuário envia a pergunta.
+2. O agente LangChain decide chamar a ferramenta `buscar_documentos`, que
+   consulta o índice vetorial Chroma e retorna os trechos mais relevantes
+   (com fonte e página).
+3. O LLM (Groq) gera a resposta com base apenas nesses trechos.
+4. A API extrai as fontes citadas e devolve `{ resposta, fontes }`.
+5. Pergunta e feedback do usuário (👍/👎) são registrados em `logs/` para
+   acompanhamento de qualidade.
+
+## Tecnologias e ferramentas
+
+| Camada              | Tecnologia |
+|---------------------|------------|
+| Orquestração do agente | [LangChain](https://python.langchain.com/) (`create_agent`) |
+| LLM                 | [Groq (GroqCloud)](https://console.groq.com/) — `llama-3.3-70b-versatile` |
+| Busca semântica / vetor DB | [Chroma](https://www.trychroma.com/) |
+| Embeddings          | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (via `langchain-huggingface`) |
+| Extração de PDF     | `pypdf` |
+| Organização dos dados | `pandas` |
+| Divisão em chunks   | `langchain-text-splitters` (`RecursiveCharacterTextSplitter`) |
+| API HTTP            | [FastAPI](https://fastapi.tiangolo.com/) + `uvicorn` |
+| Frontend            | HTML/CSS/JS estático (`static/`), servido pelo próprio FastAPI |
+| Observabilidade (opcional) | [LangSmith](https://smith.langchain.com/) |
+| Deploy              | Docker (`Dockerfile`) |
+
+## Estrutura do projeto
 
 ```
 docs/            PDFs de referencia sobre endometriose
 ingest.py        le os PDFs (pypdf + pandas) e monta o indice vetorial (chroma_db/)
-rag_agent.py      logica do agente LangChain (compartilhada por CLI e API)
+rag_agent.py     logica do agente LangChain
 agente.py        chat no terminal
 app.py           API HTTP (FastAPI) usada no deploy
+static/          frontend (pagina inicial e chat)
 Dockerfile       imagem para deploy em container
 ```
 
-## Uso local
+## Como executar o projeto
+
+### Pré-requisitos
+- Python 3.11+
+- Uma chave de API da [GroqCloud](https://console.groq.com/keys)
+
+### 1. Local (sem Docker)
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate        # Windows (PowerShell: .venv\Scripts\Activate.ps1)
+# source .venv/bin/activate   # Linux/macOS
+
 pip install -r requirements.txt
 
 copy .env.example .env        # depois edite .env com sua GROQ_API_KEY
-
-python ingest.py              # monta o indice a partir de docs/ (uma vez, ou sempre que docs/ mudar)
-python agente.py              # chat no terminal
 ```
 
-Para rodar como API localmente:
+Monte o índice vetorial a partir dos documentos em `docs/` (uma vez, ou
+sempre que `docs/` mudar):
+
+```bash
+python ingest.py
+```
+
+Chat no terminal:
+
+```bash
+python agente.py
+```
+
+Ou como API HTTP:
 
 ```bash
 uvicorn app:app --reload --port 8080
-# POST http://localhost:8080/perguntar          {"pergunta": "...", "historico": [...]}
-# POST http://localhost:8080/perguntar/stream    idem, resposta em streaming (SSE)
-# POST http://localhost:8080/feedback            {"pergunta": "...", "resposta": "...", "avaliacao": "up"|"down"}
 ```
 
-- `historico` (opcional) é a lista de mensagens anteriores da conversa
-  (`{"role": "user"|"assistant", "content": "..."}`) usada para respostas com
-  contexto; o backend usa apenas as ultimas 12.
-- `/perguntar` e `/perguntar/stream` retornam tambem `fontes` (documento e
-  pagina usados na resposta).
-- Perguntas e feedback sao gravados como JSONL em `logs/` (nao versionado).
-- Ha um limite simples de 20 requisicoes/minuto por IP em `/perguntar*`.
+Abra `http://localhost:8080` no navegador (interface de chat)
 
-## Adicionando mais documentos
+### 2. Com Docker
+
+```bash
+docker build -t endoassist .
+docker run --env-file .env -p 8080:8080 endoassist
+```
+
+O índice vetorial é construído durante o build da imagem (`RUN python
+ingest.py`), então não é necessário rodar `ingest.py` manualmente. Acesse
+`http://localhost:8080`.
+
+### Adicionando mais documentos
 
 Coloque novos PDFs em `docs/` e rode `python ingest.py` novamente para
-reconstruir o indice (e reconstrua a imagem Docker, se for redeployar).
+reconstruir o índice (e reconstrua a imagem Docker, se for redeployar).
+
+## Exemplos de perguntas que o agente consegue responder
+
+- O que é Endometriose?
+- Quais são os sintomas mais comuns da endometriose?
+- Como é feito o diagnóstico da endometriose?
+- Quais exames são usados para identificar a endometriose?
+- Quais são os tratamentos disponíveis (clínicos e cirúrgicos)?
+- Endometriose tem cura?
+- Endometriose pode causar infertilidade?
+- Qual a diferença entre cólica menstrual normal e dor de endometriose?
+
+Perguntas fora do escopo dos documentos (ex.: "qual remédio devo tomar para
+minha dor?", assuntos não relacionados à endometriose) são respondidas com um
+aviso de que a informação não está nas fontes disponíveis e a recomendação de
+procurar um médico especialista.

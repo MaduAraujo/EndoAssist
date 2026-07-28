@@ -11,7 +11,6 @@ DOCS_DIR = BASE_DIR / "docs"
 INDEX_DIR = BASE_DIR / "chroma_db"
 EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
-
 def carregar_documentos() -> pd.DataFrame:
     linhas = []
     for caminho in sorted(DOCS_DIR.glob("*.pdf")):
@@ -21,7 +20,6 @@ def carregar_documentos() -> pd.DataFrame:
             if texto:
                 linhas.append({"fonte": caminho.name, "pagina": numero, "texto": texto})
     return pd.DataFrame(linhas)
-
 
 def construir_indice() -> None:
     df = carregar_documentos()
@@ -48,7 +46,6 @@ def construir_indice() -> None:
         persist_directory=str(INDEX_DIR),
     )
     print(f"Indice salvo em {INDEX_DIR}")
-
 
 if __name__ == "__main__":
     construir_indice()

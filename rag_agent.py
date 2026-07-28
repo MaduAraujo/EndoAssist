@@ -47,7 +47,6 @@ def montar_agente():
 
     @tool
     def buscar_documentos(pergunta: str) -> str:
-        """Busca trechos relevantes nos documentos sobre endometriose para responder a pergunta."""
         documentos = retriever.invoke(pergunta)
         if not documentos:
             return "Nenhum trecho relevante foi encontrado nos documentos."
@@ -89,7 +88,6 @@ def perguntar(agente, pergunta: str, historico: list[dict] | None = None) -> dic
 
 
 def perguntar_stream(agente, pergunta: str, historico: list[dict] | None = None):
-    """Gera eventos ("status" | "token" | "fonte") conforme a resposta e produzida."""
     mensagens = _montar_mensagens(pergunta, historico)
     buscando_emitido = False
 
