@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat</title>
+  <link rel="icon" type="image/png" href="/img/hero.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/style/chat.css">
+</head>
+<body>
+  <div class="grid-overlay"></div>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="app">
+    <header>
+      <div class="marca">
+        <img class="icone" src="/img/hero.png" alt="EndoAssist">
+        <div class="nome">EndoAssist</div>
+      </div>
+      <div class="header-direita">
+        <button id="novaConversa" type="button" class="botao-secundario" title="Nova conversa"
+          aria-label="Nova conversa">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <div class="status"><span class="dot"></span>Online</div>
+      </div>
+    </header>
+    <div id="chat" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversa com o EndoAssist">
+      <div id="vazio" class="vazio"></div>
+    </div>
+    <form id="form">
+      <textarea id="entrada" rows="1" placeholder="Digite sua pergunta..." autofocus></textarea>
+      <button id="enviar" type="submit">
+        <span>Enviar</span>
+      </button>
+    </form>
+    <div class="aviso">
+      Este agente usa IA para responder com base em documentos de referência e
+      não substitui uma consulta médica.<br>
+      Em caso de dúvida sobre sua saúde, procure um profissional especialista.
+    </div>
+  </div>
+
+  <script src="/javascript/chat.js"></script>
+</body>
+</html>

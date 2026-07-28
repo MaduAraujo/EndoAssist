@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EndoAssist</title>
+  <link rel="icon" type="image/png" href="/img/hero.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/style/index.css">
+</head>
+<body>
+  <div class="grid-overlay"></div>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="stage">
+    <h1>EndoAssist</h1>
+    <p class="lead">
+      O seu agente de Endometriose.
+    </p>
+    <img class="hero" src="/img/hero.png" alt="Ilustracao sobre endometriose">
+    <form id="form">
+      <textarea id="entrada" rows="1" autofocus></textarea>
+      <button id="enviar" type="submit">
+        <span>Enviar</span>
+      </button>
+    </form>
+    <div class="sugestoes">
+      <button type="button" class="sugestao" data-pergunta="O que é Endometriose?">O que é Endometriose?</button>
+      <button type="button" class="sugestao" data-pergunta="Sintomas mais comuns?">Sintomas mais comuns</button>
+      <button type="button" class="sugestao" data-pergunta="Como é feito o diagnóstico?">Como é feito o
+        diagnóstico?</button>
+    </div>
+    <div class="aviso">
+      Este agente usa IA para responder com base em documentos de referência e
+      não substitui uma consulta médica. Em caso de dúvida sobre sua saúde,
+      procure um profissional especialista.
+    </div>
+  </div>
+
+  <script src="/javascript/index.js"></script>
+</body>
+</html>

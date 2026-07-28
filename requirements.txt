@@ -1,0 +1,12 @@
+langchain>=1.3
+langchain-groq
+langchain-text-splitters
+langchain-huggingface
+langchain-chroma
+chromadb
+sentence-transformers
+pypdf
+pandas
+python-dotenv
+fastapi
+uvicorn[standard]
