@@ -14,6 +14,18 @@ médico.
 
 ---
 
+## EndoAssist rodando
+<p align="center">
+  <video controls src="20260728-1436-58.4176636.mp4" title="EndoAssist"></video>
+</p>
+
+---
+
+## Visualização no LangChain
+<p align="center">
+  <img src="Captura de tela 2026-07-28 114012.png" alt="LangChain">
+</p>
+
 ## Arquitetura da solução
 
 ```
@@ -26,13 +38,17 @@ médico.
                                    │
                      RecursiveCharacterTextSplitter (chunks)
                                    │
-        HuggingFaceEmbeddings (sentence-transformers, multilingue)
+        HuggingFaceEmbeddings (sentence-transformers, multilingue,
+                                roda local so durante o build)
                                    │
                                    ▼
                       ┌──────────────────────────┐
                       │   chroma_db/ (vector DB) │
                       └────────────┬─────────────┘
                                    │ retriever.invoke(pergunta)
+                                   │ embedding da pergunta via
+                                   │ HuggingFaceEndpointEmbeddings
+                                   │ (HF Inference API, em runtime)
                                    ▼
       ┌───────────────────────────────────────────────────────┐
       │  Agente LangChain (create_agent)                       │
@@ -70,14 +86,14 @@ Fluxo por pergunta:
 | Orquestração do agente | [LangChain](https://python.langchain.com/) |
 | LLM                 | [GroqCloud](https://console.groq.com/) — `llama-3.3-70b-versatile` |
 | Busca semântica | [Chroma](https://www.trychroma.com/) |
-| Embeddings          | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (via `langchain-huggingface`) |
+| Embeddings          | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` — local (via `langchain-huggingface`) no build/ingest, remoto via HF Inference API (`HuggingFaceEndpointEmbeddings`) em runtime |
 | Extração de PDF     | `pypdf` |
 | Organização dos dados | `pandas` |
 | Divisão em chunks   | `langchain-text-splitters` (`RecursiveCharacterTextSplitter`) |
 | API HTTP            | [FastAPI](https://fastapi.tiangolo.com/) + `uvicorn` |
 | Frontend            | HTML/CSS/JS, servido pelo próprio FastAPI |
 | Observabilidade | [LangSmith](https://smith.langchain.com/) |
-| Deploy              | Hugging Face Spaces |
+| Deploy              | [Render](https://render.com/) (Web Service, via `Dockerfile`) |
 
 ---
 
@@ -165,7 +181,7 @@ reconstruir o índice (e reconstrua a imagem Docker, se for redeployar).
 - Endometriose pode causar infertilidade?
 - Qual a diferença entre cólica menstrual normal e dor de endometriose?
 
-Perguntas fora do escopo dos documentos (ex.: "qual remédio devo tomar para
+Perguntas fora do escopo dos documentos (ex: "qual remédio devo tomar para
 minha dor?", assuntos não relacionados à endometriose) são respondidas com um
 aviso de que a informação não está nas fontes disponíveis e a recomendação de
 procurar um médico especialista.
