@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY rag_agent.py ingest.py agente.py app.py ./
 COPY docs/ ./docs/
 COPY static/ ./static/
+COPY img/ ./img/
 
 RUN python ingest.py
 
