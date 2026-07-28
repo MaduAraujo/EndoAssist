@@ -16,7 +16,7 @@ médico.
 
 ## EndoAssist rodando
 <p align="center">
-  <video controls src="README/20260728-1436-58.4176636.mp4" title="EndoAssist"></video>
+  <video controls src="https://github.com/user-attachments/assets/fdf49430-66ce-41c8-8954-245a330d0492" title="EndoAssist"></video>
 </p>
 
 ---
