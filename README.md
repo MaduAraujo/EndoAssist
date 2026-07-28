@@ -99,6 +99,9 @@ Dockerfile       imagem para deploy em container
 ### Pré-requisitos
 - Python 3.11+
 - Uma chave de API da [GroqCloud](https://console.groq.com/keys)
+- Um token da [Hugging Face](https://huggingface.co/settings/tokens) (usado em
+  runtime para gerar o embedding da pergunta via Inference API, sem precisar
+  carregar o modelo localmente)
 
 ### 1. Local (sem Docker)
 

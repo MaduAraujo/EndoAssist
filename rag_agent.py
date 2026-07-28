@@ -5,7 +5,7 @@ from pathlib import Path
 from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
 from langchain_core.messages import ToolMessage
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_core.tools import tool
 from langchain.agents import create_agent
 
@@ -37,7 +37,7 @@ def _carregar_retriever(k: int = 4):
         raise SystemExit(
             f"Indice nao encontrado em {INDEX_DIR}. Rode `python ingest.py` primeiro."
         )
-    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+    embeddings = HuggingFaceEndpointEmbeddings(model=EMBEDDING_MODEL)
     vectorstore = Chroma(persist_directory=str(INDEX_DIR), embedding_function=embeddings)
     return vectorstore.as_retriever(search_kwargs={"k": k})
 
