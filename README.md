@@ -23,7 +23,7 @@ médico.
 
 ## Visualização no LangChain
 <p align="center">
-  <img src="README/Captura de tela 2026-07-28 114012.png" alt="LangChain">
+  <img src="README/Captura de tela 2026-07-28 114632.png" alt="LangChain">
 </p>
 
 ## Arquitetura da solução
