@@ -16,14 +16,14 @@ médico.
 
 ## EndoAssist rodando
 <p align="center">
-  <video controls src="20260728-1436-58.4176636.mp4" title="EndoAssist"></video>
+  <video controls src="README/20260728-1436-58.4176636.mp4" title="EndoAssist"></video>
 </p>
 
 ---
 
 ## Visualização no LangChain
 <p align="center">
-  <img src="Captura de tela 2026-07-28 114012.png" alt="LangChain">
+  <img src="README/Captura de tela 2026-07-28 114012.png" alt="LangChain">
 </p>
 
 ## Arquitetura da solução
