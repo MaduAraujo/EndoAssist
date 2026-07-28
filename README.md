@@ -12,6 +12,8 @@ O agente é explicitamente instruído a admitir quando não sabe algo e a
 recomendar consulta a um médico especialista — ele não substitui atendimento
 médico.
 
+---
+
 ## Arquitetura da solução
 
 ```
@@ -59,21 +61,25 @@ Fluxo por pergunta:
 5. Pergunta e feedback do usuário (👍/👎) são registrados em `logs/` para
    acompanhamento de qualidade.
 
+---
+
 ## Tecnologias e ferramentas
 
 | Camada              | Tecnologia |
 |---------------------|------------|
-| Orquestração do agente | [LangChain](https://python.langchain.com/) (`create_agent`) |
-| LLM                 | [Groq (GroqCloud)](https://console.groq.com/) — `llama-3.3-70b-versatile` |
-| Busca semântica / vetor DB | [Chroma](https://www.trychroma.com/) |
+| Orquestração do agente | [LangChain](https://python.langchain.com/) |
+| LLM                 | [GroqCloud](https://console.groq.com/) — `llama-3.3-70b-versatile` |
+| Busca semântica | [Chroma](https://www.trychroma.com/) |
 | Embeddings          | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (via `langchain-huggingface`) |
 | Extração de PDF     | `pypdf` |
 | Organização dos dados | `pandas` |
 | Divisão em chunks   | `langchain-text-splitters` (`RecursiveCharacterTextSplitter`) |
 | API HTTP            | [FastAPI](https://fastapi.tiangolo.com/) + `uvicorn` |
-| Frontend            | HTML/CSS/JS estático (`static/`), servido pelo próprio FastAPI |
-| Observabilidade (opcional) | [LangSmith](https://smith.langchain.com/) |
-| Deploy              | Docker (`Dockerfile`) |
+| Frontend            | HTML/CSS/JS, servido pelo próprio FastAPI |
+| Observabilidade | [LangSmith](https://smith.langchain.com/) |
+| Deploy              | Hugging Face Spaces |
+
+---
 
 ## Estrutura do projeto
 
@@ -86,6 +92,7 @@ app.py           API HTTP (FastAPI) usada no deploy
 static/          frontend (pagina inicial e chat)
 Dockerfile       imagem para deploy em container
 ```
+---
 
 ## Como executar o projeto
 
@@ -136,6 +143,8 @@ docker run --env-file .env -p 8080:8080 endoassist
 O índice vetorial é construído durante o build da imagem (`RUN python
 ingest.py`), então não é necessário rodar `ingest.py` manualmente. Acesse
 `http://localhost:8080`.
+
+---
 
 ### Adicionando mais documentos
 
