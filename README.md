@@ -11,10 +11,6 @@ página cada informação veio.
 O agente é explicitamente instruído a admitir quando não sabe algo e a
 recomendar consulta a um médico especialista — ele não substitui atendimento
 médico.
-<br>
-<br>
-
-**Acesse:** [endoassist.onrender.com](https://endoassist.onrender.com/)
 
 ---
 
