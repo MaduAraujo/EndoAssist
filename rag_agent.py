@@ -47,6 +47,7 @@ def montar_agente():
 
     @tool
     def buscar_documentos(pergunta: str) -> str:
+        """Busca trechos relevantes nos documentos de referencia sobre endometriose para responder a pergunta."""
         documentos = retriever.invoke(pergunta)
         if not documentos:
             return "Nenhum trecho relevante foi encontrado nos documentos."
